@@ -5,6 +5,16 @@
   <h1>검증 이력 / 업무량 분석</h1>
 </div>
 
+{% if clients %}
+<div class="filter-row">
+  <span class="filter-label">고객사</span>
+  <a href="{{ url_for('dashboard.history') }}" class="{{ 'active' if not selected_client }}">전체</a>
+  {% for c in clients %}
+  <a href="{{ url_for('dashboard.history', company=c) }}" class="{{ 'active' if c == selected_client }}">{{ c }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+
 <div class="card">
   <div id="historyGrid" class="ag-theme-balham grid-panel"></div>
 </div>
@@ -15,6 +25,7 @@
   var historyRows = [
     {% for u, s in rows %}
     {
+      client_name: {{ u.client_name|tojson }},
       month: {{ u.payroll_month|tojson }},
       uploaded_at: {{ u.uploaded_at.strftime('%Y-%m-%d %H:%M')|tojson }},
       uploader: {{ u.uploader.name|tojson }},
@@ -30,6 +41,7 @@
   ];
 
   PV.initGrid('historyGrid', [
+    { field: 'client_name', headerName: '고객사', maxWidth: 130 },
     { field: 'month', headerName: '기준월', maxWidth: 100 },
     { field: 'uploaded_at', headerName: '업로드 일시', maxWidth: 160 },
     { field: 'uploader', headerName: '업로드자', maxWidth: 100 },

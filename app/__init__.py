@@ -53,7 +53,20 @@ def create_app():
 
     with app.app_context():
         db.create_all()
+        _run_light_migrations()
         from .seed import seed_defaults
         seed_defaults()
 
     return app
+
+
+def _run_light_migrations():
+    """Add columns introduced after the initial schema, without a full migration tool."""
+    from sqlalchemy import inspect, text
+
+    inspector = inspect(db.engine)
+    columns = [c["name"] for c in inspector.get_columns("payroll_upload")]
+    if "client_name" not in columns:
+        db.session.execute(text("ALTER TABLE payroll_upload ADD COLUMN client_name VARCHAR(100)"))
+        db.session.execute(text("UPDATE payroll_upload SET client_name = '' WHERE client_name IS NULL"))
+        db.session.commit()

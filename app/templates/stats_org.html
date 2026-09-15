@@ -5,13 +5,22 @@
   <h1>조직별 통계</h1>
 </div>
 
+{% if clients %}
+<div class="filter-row">
+  <span class="filter-label">고객사</span>
+  {% for c in clients %}
+  <a href="{{ url_for('dashboard.org_stats', company=c) }}" class="{{ 'active' if c == selected_client }}">{{ c }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+
 {% if not latest_upload %}
   <div class="card empty-state">
     <p>아직 업로드된 급여 파일이 없습니다.</p>
     <a class="btn" href="{{ url_for('upload.upload_file') }}">첫 파일 업로드하기</a>
   </div>
 {% else %}
-  <p class="page-desc">최신 검증 기준월: <strong>{{ latest_upload.payroll_month }}</strong></p>
+  <p class="page-desc">{{ selected_client }} · 최신 검증 기준월: <strong>{{ latest_upload.payroll_month }}</strong></p>
 
   <div class="card">
     <div class="section-label">조직별 심각도 건수 ({{ latest_upload.payroll_month }})</div>

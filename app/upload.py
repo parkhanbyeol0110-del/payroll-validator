@@ -18,10 +18,20 @@ ALLOWED_EXTENSIONS = {".xlsx", ".xls", ".csv"}
 @login_required
 def upload_file():
     if request.method == "GET":
-        return render_template("upload.html")
+        existing_clients = [
+            row[0] for row in
+            db.session.query(PayrollUpload.client_name).distinct().order_by(PayrollUpload.client_name).all()
+            if row[0]
+        ]
+        return render_template("upload.html", existing_clients=existing_clients)
 
+    client_name = request.form.get("client_name", "").strip()
     payroll_month = request.form.get("payroll_month", "").strip()
     file = request.files.get("payroll_file")
+
+    if not client_name:
+        flash("고객사명을 입력해 주세요.", "error")
+        return redirect(url_for("upload.upload_file"))
 
     if not payroll_month:
         flash("급여 기준월을 선택해 주세요.", "error")
@@ -58,6 +68,7 @@ def upload_file():
     start_time = time.time()
 
     payroll_upload = PayrollUpload(
+        client_name=client_name,
         payroll_month=payroll_month,
         file_name=file.filename,
         uploaded_by=current_user.id,
@@ -85,7 +96,7 @@ def upload_file():
 
     prev_upload = (
         PayrollUpload.query
-        .filter(PayrollUpload.payroll_month < payroll_month)
+        .filter(PayrollUpload.client_name == client_name, PayrollUpload.payroll_month < payroll_month)
         .order_by(PayrollUpload.payroll_month.desc())
         .first()
     )

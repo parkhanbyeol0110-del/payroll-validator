@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}{{ upload.payroll_month }} 검증 상세{% endblock %}
+{% block title %}{{ upload.client_name }} {{ upload.payroll_month }} 검증 상세{% endblock %}
 {% block content %}
 <div class="page-header">
-  <h1>{{ upload.payroll_month }} 검증 상세</h1>
+  <h1>{{ upload.client_name }} · {{ upload.payroll_month }} 검증 상세</h1>
   <div class="action-row">
     <button type="button" class="btn btn-secondary btn-sm" id="exportBtn">엑셀로 내보내기</button>
     <form method="post" action="{{ url_for('dashboard.revalidate', upload_id=upload.id) }}">

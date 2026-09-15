@@ -13,15 +13,31 @@ dashboard_bp = Blueprint("dashboard", __name__)
 @dashboard_bp.route("/")
 @login_required
 def index():
-    latest_upload = PayrollUpload.query.order_by(PayrollUpload.payroll_month.desc(),
-                                                   PayrollUpload.uploaded_at.desc()).first()
-    uploads = PayrollUpload.query.order_by(PayrollUpload.payroll_month.desc()).limit(6).all()
+    clients = _client_list()
+    selected_client = request.args.get("company") or (clients[0] if clients else None)
 
-    summary = None
-    if latest_upload:
-        summary = _upload_summary(latest_upload)
+    latest_upload = _latest_upload(selected_client)
+    uploads = (
+        PayrollUpload.query.filter_by(client_name=selected_client).order_by(PayrollUpload.uploaded_at.desc()).limit(6).all()
+        if selected_client else []
+    )
 
-    return render_template("dashboard.html", latest_upload=latest_upload, summary=summary, uploads=uploads)
+    company_rows = []
+    for c in clients:
+        u = _latest_upload(c)
+        if u:
+            s = _upload_summary(u)
+            company_rows.append({
+                "client_name": c, "upload_id": u.id, "month": u.payroll_month,
+                "headcount": u.employee_count, "critical": s["critical_count"],
+                "warning": s["warning_count"], "info": s["info_count"],
+                "unresolved": s["unresolved_count"],
+            })
+
+    summary = _upload_summary(latest_upload) if latest_upload else None
+
+    return render_template("dashboard.html", latest_upload=latest_upload, summary=summary, uploads=uploads,
+                            clients=clients, selected_client=selected_client, company_rows=company_rows)
 
 
 @dashboard_bp.route("/uploads/<int:upload_id>")
@@ -77,7 +93,7 @@ def revalidate(upload_id):
 
     prev_upload = (
         PayrollUpload.query
-        .filter(PayrollUpload.payroll_month < upload.payroll_month)
+        .filter(PayrollUpload.client_name == upload.client_name, PayrollUpload.payroll_month < upload.payroll_month)
         .order_by(PayrollUpload.payroll_month.desc())
         .first()
     )
@@ -121,21 +137,28 @@ def revalidate(upload_id):
 @dashboard_bp.route("/history")
 @login_required
 def history():
-    uploads = PayrollUpload.query.order_by(PayrollUpload.payroll_month.desc()).all()
+    clients = _client_list()
+    selected_client = request.args.get("company")
+
+    query = PayrollUpload.query
+    if selected_client:
+        query = query.filter_by(client_name=selected_client)
+    uploads = query.order_by(PayrollUpload.client_name, PayrollUpload.payroll_month.desc()).all()
     rows = []
     for u in uploads:
         s = _upload_summary(u)
         rows.append((u, s))
-    return render_template("history.html", rows=rows)
+    return render_template("history.html", rows=rows, clients=clients, selected_client=selected_client)
 
 
 @dashboard_bp.route("/stats/org")
 @login_required
 def org_stats():
-    latest_upload = PayrollUpload.query.order_by(PayrollUpload.payroll_month.desc(),
-                                                   PayrollUpload.uploaded_at.desc()).first()
+    clients = _client_list()
+    selected_client = request.args.get("company") or (clients[0] if clients else None)
+    latest_upload = _latest_upload(selected_client)
     if not latest_upload:
-        return render_template("stats_org.html", latest_upload=None)
+        return render_template("stats_org.html", latest_upload=None, clients=clients, selected_client=selected_client)
 
     headcount_by_org = {}
     for rec in latest_upload.records:
@@ -176,7 +199,10 @@ def org_stats():
     org_rows.sort(key=lambda r: -(r["critical"] + r["warning"]))
 
     # Month x org trend (CRITICAL + WARNING count) to surface repeat-offender orgs (PRD 14장)
-    all_uploads = PayrollUpload.query.order_by(PayrollUpload.payroll_month).all()
+    all_uploads = (
+        PayrollUpload.query.filter_by(client_name=selected_client)
+        .order_by(PayrollUpload.payroll_month).all()
+    )
     months = [u.payroll_month for u in all_uploads]
     trend = {}
     for u in all_uploads:
@@ -189,7 +215,8 @@ def org_stats():
     trend_orgs = sorted(trend.keys(), key=lambda o: -sum(trend[o].values()))
 
     return render_template("stats_org.html", latest_upload=latest_upload, org_rows=org_rows,
-                            months=months, trend=trend, trend_orgs=trend_orgs)
+                            months=months, trend=trend, trend_orgs=trend_orgs,
+                            clients=clients, selected_client=selected_client)
 
 
 @dashboard_bp.route("/rules")
@@ -223,6 +250,21 @@ def update_threshold(rule_id):
     db.session.commit()
     flash("Rule 기준값이 업데이트되었습니다.", "success")
     return redirect(url_for("dashboard.rules"))
+
+
+def _client_list():
+    rows = db.session.query(PayrollUpload.client_name).distinct().order_by(PayrollUpload.client_name).all()
+    return [r[0] for r in rows if r[0]]
+
+
+def _latest_upload(client_name):
+    if not client_name:
+        return None
+    return (
+        PayrollUpload.query.filter_by(client_name=client_name)
+        .order_by(PayrollUpload.payroll_month.desc(), PayrollUpload.uploaded_at.desc())
+        .first()
+    )
 
 
 def _upload_summary(upload):

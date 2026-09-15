@@ -33,6 +33,7 @@ class PayrollUpload(db.Model):
     __tablename__ = "payroll_upload"
 
     id = db.Column(db.Integer, primary_key=True)
+    client_name = db.Column(db.String(100), nullable=False, default="")  # BPO 고객사명
     payroll_month = db.Column(db.String(7), nullable=False)  # YYYY-MM
     file_name = db.Column(db.String(255), nullable=False)
     uploaded_by = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)

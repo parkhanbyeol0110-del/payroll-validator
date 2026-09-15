@@ -5,15 +5,28 @@
   <h1>대시보드</h1>
 </div>
 
-{% if not latest_upload %}
+{% if not clients %}
   <div class="card empty-state">
     <p>아직 업로드된 급여 파일이 없습니다.</p>
     <a class="btn" href="{{ url_for('upload.upload_file') }}">첫 파일 업로드하기</a>
   </div>
 {% else %}
+  <div class="filter-row">
+    <span class="filter-label">고객사</span>
+    {% for c in clients %}
+    <a href="{{ url_for('dashboard.index', company=c) }}" class="{{ 'active' if c == selected_client }}">{{ c }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <h2>고객사별 최신 현황</h2>
+    <div id="companyGrid" class="ag-theme-balham grid-panel"></div>
+  </div>
+
+  {% if latest_upload %}
   <div class="card">
     <div class="page-header" style="margin-bottom:14px">
-      <h2 style="margin:0">{{ latest_upload.payroll_month }} 급여 검증 결과</h2>
+      <h2 style="margin:0">{{ selected_client }} · {{ latest_upload.payroll_month }} 급여 검증 결과</h2>
       <a class="btn btn-secondary btn-sm" href="{{ url_for('dashboard.upload_detail', upload_id=latest_upload.id) }}">상세 보기 →</a>
     </div>
 
@@ -37,13 +50,45 @@
   </div>
 
   <div class="card">
-    <h2>최근 업로드</h2>
+    <h2>{{ selected_client }} 최근 업로드</h2>
     <div id="uploadsGrid" class="ag-theme-balham grid-panel"></div>
   </div>
+  {% endif %}
 {% endif %}
 {% endblock %}
 
 {% block scripts %}
+{% if clients %}
+<script>
+  var companyRows = [
+    {% for c in company_rows %}
+    {
+      client_name: {{ c.client_name|tojson }},
+      month: {{ c.month|tojson }},
+      headcount: {{ c.headcount }},
+      critical: {{ c.critical }},
+      warning: {{ c.warning }},
+      info: {{ c.info }},
+      unresolved: {{ c.unresolved }},
+      url: {{ url_for('dashboard.upload_detail', upload_id=c.upload_id)|tojson }},
+    },
+    {% endfor %}
+  ];
+
+  PV.initGrid('companyGrid', [
+    { field: 'client_name', headerName: '고객사', maxWidth: 150 },
+    { field: 'month', headerName: '최신 기준월', maxWidth: 120 },
+    { field: 'headcount', headerName: '인원', maxWidth: 90 },
+    { field: 'critical', headerName: 'CRITICAL', maxWidth: 110 },
+    { field: 'warning', headerName: 'WARNING', maxWidth: 110 },
+    { field: 'info', headerName: 'INFO', maxWidth: 90 },
+    { field: 'unresolved', headerName: '미처리', maxWidth: 90 },
+    { headerName: '', maxWidth: 90, sortable: false, filter: false,
+      cellRenderer: function (p) { return '<a href="' + p.data.url + '">보기 →</a>'; } },
+  ], companyRows, { pagination: false });
+</script>
+{% endif %}
+
 {% if latest_upload %}
 <script>
   var sevData = { critical: {{ summary.critical_count }}, warning: {{ summary.warning_count }}, info: {{ summary.info_count }} };

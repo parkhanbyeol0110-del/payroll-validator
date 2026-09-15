@@ -8,6 +8,12 @@
 
 <div class="card">
   <form method="post" enctype="multipart/form-data" class="upload-form" id="uploadForm">
+    <label>고객사명</label>
+    <input type="text" name="client_name" list="clientList" placeholder="예: 세종물류" required>
+    <datalist id="clientList">
+      {% for c in existing_clients %}<option value="{{ c }}">{% endfor %}
+    </datalist>
+
     <label>급여 기준월</label>
     <input type="month" name="payroll_month" required>
 
