@@ -1,3 +1,6 @@
+import os
+import secrets
+
 from .extensions import db
 from .models import User, ValidationRule
 
@@ -27,6 +30,12 @@ def seed_defaults():
 
     if User.query.count() == 0:
         admin = User(username="admin", name="관리자", role="admin")
-        admin.set_password("admin1234")
+        preset_password = os.environ.get("ADMIN_INITIAL_PASSWORD")
+        admin_password = preset_password or secrets.token_urlsafe(9)
+        admin.set_password(admin_password)
         db.session.add(admin)
         db.session.commit()
+        if not preset_password:
+            # Printed to the server log only — never stored in code or shown in the UI.
+            print(f"[seed] 초기 관리자 계정이 생성되었습니다. username=admin password={admin_password}")
+            print("[seed] 다음부터는 ADMIN_INITIAL_PASSWORD 환경변수로 직접 지정할 수 있습니다.")

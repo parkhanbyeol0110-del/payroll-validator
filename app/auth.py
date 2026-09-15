@@ -29,3 +29,26 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for("auth.login"))
+
+
+@auth_bp.route("/account/password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    if request.method == "POST":
+        current_password = request.form.get("current_password", "")
+        new_password = request.form.get("new_password", "")
+        confirm_password = request.form.get("confirm_password", "")
+
+        if not current_user.check_password(current_password):
+            flash("현재 비밀번호가 올바르지 않습니다.", "error")
+        elif len(new_password) < 8:
+            flash("새 비밀번호는 8자 이상이어야 합니다.", "error")
+        elif new_password != confirm_password:
+            flash("새 비밀번호가 일치하지 않습니다.", "error")
+        else:
+            current_user.set_password(new_password)
+            db.session.commit()
+            flash("비밀번호가 변경되었습니다.", "success")
+            return redirect(url_for("dashboard.index"))
+
+    return render_template("change_password.html")

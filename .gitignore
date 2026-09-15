@@ -10,3 +10,5 @@ instance/
 
 .vercel
 .env*
+node_modules/
+docs/

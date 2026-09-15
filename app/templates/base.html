@@ -52,6 +52,9 @@
           <strong>{{ current_user.name }}</strong>
           <small>{{ '관리자' if current_user.is_admin else '담당자' }}</small>
         </div>
+        <a href="{{ url_for('auth.change_password') }}" class="logout-link" title="비밀번호 변경">
+          <svg viewBox="0 0 20 20" fill="none"><circle cx="7" cy="13" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M9.2 10.8L15.5 4.5M15.5 4.5H12.5M15.5 4.5V7.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
         <a href="{{ url_for('auth.logout') }}" class="logout-link" title="로그아웃">
           <svg viewBox="0 0 20 20" fill="none"><path d="M8 4H5.5C4.67 4 4 4.67 4 5.5V14.5C4 15.33 4.67 16 5.5 16H8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M12.5 13.5L16 10L12.5 6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 10H8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         </a>

@@ -11,9 +11,12 @@ venv\Scripts\pip install -r requirements.txt
 venv\Scripts\python run.py
 ```
 
-브라우저에서 http://127.0.0.1:5000 접속. 기본 관리자 계정: `admin` / `admin1234`
+브라우저에서 http://127.0.0.1:5000 접속.
 
-첫 실행 시 `instance/payroll.db` (SQLite)가 자동 생성되고 기본 검증 Rule 7종과 관리자 계정이 시드됩니다.
+첫 실행 시 `instance/payroll.db` (SQLite)가 자동 생성되고 기본 검증 Rule 7종과 관리자 계정(`admin`)이 시드됩니다.
+초기 비밀번호는 `ADMIN_INITIAL_PASSWORD` 환경변수로 직접 지정하거나, 지정하지 않으면 무작위로 생성되어
+**서버 실행 로그에만** 한 번 출력됩니다 (코드나 화면에는 절대 노출되지 않음). 로그인 후에는 사이드바의
+"비밀번호 변경"에서 원하는 비밀번호로 바꿀 수 있습니다.
 
 ## 구현된 기능 (PRD 20장 MVP 범위)
 
