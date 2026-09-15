@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}{{ upload.payroll_month }} 검증 상세{% endblock %}
+{% block content %}
+<div class="detail-header">
+  <h1>{{ upload.payroll_month }} 검증 상세</h1>
+  <form method="post" action="{{ url_for('dashboard.revalidate', upload_id=upload.id) }}">
+    <button type="submit" class="btn btn-secondary">재검증</button>
+  </form>
+</div>
+
+<div class="card">
+  <div class="kpi-row">
+    <div class="kpi"><span class="kpi-label">전체 인원</span><span class="kpi-value">{{ summary.total }}명</span></div>
+    <div class="kpi kpi-normal"><span class="kpi-label">정상</span><span class="kpi-value">{{ summary.normal }}명</span></div>
+    <div class="kpi kpi-warning"><span class="kpi-label">검토 필요</span><span class="kpi-value">{{ summary.warning }}명</span></div>
+    <div class="kpi kpi-error"><span class="kpi-label">오류</span><span class="kpi-value">{{ summary.error }}명</span></div>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi"><span class="kpi-label">미처리</span><span class="kpi-value">{{ summary.unresolved_count }}건</span></div>
+    <div class="kpi"><span class="kpi-label">처리완료</span><span class="kpi-value">{{ summary.resolved_count }}건</span></div>
+    <div class="kpi"><span class="kpi-label">파일명</span><span class="kpi-value small">{{ upload.file_name }}</span></div>
+    <div class="kpi"><span class="kpi-label">검증 소요</span><span class="kpi-value small">{{ upload.validation_seconds }}초</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>오류 유형별 건수</h2>
+  <table class="simple-table">
+    <thead><tr><th>Rule</th><th>건수</th></tr></thead>
+    <tbody>
+      {% for (code, name), count in summary.by_rule %}
+      <tr><td>{{ name }} ({{ code }})</td><td>{{ count }}건</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <div class="filter-row">
+    <span>필터:</span>
+    <a href="{{ url_for('dashboard.upload_detail', upload_id=upload.id) }}"
+       class="{{ 'active' if not severity_filter and not status_filter }}">전체</a>
+    <a href="{{ url_for('dashboard.upload_detail', upload_id=upload.id, severity='CRITICAL') }}"
+       class="{{ 'active' if severity_filter == 'CRITICAL' }}">CRITICAL</a>
+    <a href="{{ url_for('dashboard.upload_detail', upload_id=upload.id, severity='WARNING') }}"
+       class="{{ 'active' if severity_filter == 'WARNING' }}">WARNING</a>
+    <a href="{{ url_for('dashboard.upload_detail', upload_id=upload.id, severity='INFO') }}"
+       class="{{ 'active' if severity_filter == 'INFO' }}">INFO</a>
+    <span class="sep">|</span>
+    <a href="{{ url_for('dashboard.upload_detail', upload_id=upload.id, status='미처리') }}"
+       class="{{ 'active' if status_filter == '미처리' }}">미처리만</a>
+  </div>
+
+  <table class="result-table">
+    <thead>
+      <tr><th>사번</th><th>성명</th><th>조직</th><th>Rule</th><th>검증 결과</th><th>심각도</th><th>처리상태</th><th>처리</th></tr>
+    </thead>
+    <tbody>
+      {% for r in results %}
+      <tr class="sev-{{ r.severity|lower }}">
+        <td>{{ r.employee_id or '-' }}</td>
+        <td>{{ r.employee_name or '-' }}</td>
+        <td>{{ r.org or '-' }}</td>
+        <td>{{ r.rule.rule_name }}</td>
+        <td>{{ r.result_text }}</td>
+        <td><span class="badge badge-{{ r.severity|lower }}">{{ r.severity }}</span></td>
+        <td>{{ r.status }}</td>
+        <td>
+          <details>
+            <summary>처리</summary>
+            <form method="post" action="{{ url_for('dashboard.resolve_result', result_id=r.id) }}" class="resolve-form">
+              <select name="status">
+                <option value="검토중" {{ 'selected' if r.status == '검토중' }}>검토중</option>
+                <option value="정상" {{ 'selected' if r.status == '정상' }}>정상</option>
+                <option value="수정완료" {{ 'selected' if r.status == '수정완료' }}>수정완료</option>
+              </select>
+              <input type="text" name="reason" placeholder="처리 사유 (예: 승진에 따른 인상)" value="">
+              <button type="submit">저장</button>
+            </form>
+            {% if r.resolutions %}
+            <ul class="resolution-history">
+              {% for h in r.resolutions %}
+              <li>[{{ h.resolved_at.strftime('%Y-%m-%d %H:%M') }}] {{ h.resolver.name }} → {{ h.status }}{% if h.reason %} ({{ h.reason }}){% endif %}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </details>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="empty-row">해당 조건의 검증 결과가 없습니다.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

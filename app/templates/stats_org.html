@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}조직별 통계{% endblock %}
+{% block content %}
+<h1>조직별 통계</h1>
+
+{% if not latest_upload %}
+  <div class="card empty-state">
+    <p>아직 업로드된 급여 파일이 없습니다.</p>
+    <a class="btn" href="{{ url_for('upload.upload_file') }}">첫 파일 업로드하기</a>
+  </div>
+{% else %}
+  <p class="page-desc">최신 검증 기준월: <strong>{{ latest_upload.payroll_month }}</strong></p>
+
+  <div class="card">
+    <h2>조직별 인원 / 오류 현황 ({{ latest_upload.payroll_month }})</h2>
+    <div class="chart-row">
+      <div class="chart-box" style="max-width:640px">
+        <canvas id="orgSeverityChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <table class="simple-table">
+      <thead>
+        <tr>
+          <th>조직</th><th>인원</th><th>CRITICAL</th><th>WARNING</th><th>INFO</th>
+          <th>오류율</th><th>미처리</th><th>처리완료</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in org_rows %}
+        <tr>
+          <td>{{ r.org }}</td>
+          <td>{{ r.headcount }}명</td>
+          <td>{{ r.critical }}</td>
+          <td>{{ r.warning }}</td>
+          <td>{{ r.info }}</td>
+          <td>{{ "%.1f"|format(r.error_rate) }}%</td>
+          <td>{{ r.unresolved }}</td>
+          <td>{{ r.resolved }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="empty-row">데이터가 없습니다.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>월별 조직 오류 추이 (CRITICAL + WARNING 합계)</h2>
+    <p class="hint">반복적으로 오류가 발생하는 조직을 파악하기 위한 표입니다.</p>
+    <div class="table-scroll">
+      <table class="simple-table">
+        <thead>
+          <tr>
+            <th>조직</th>
+            {% for m in months %}<th>{{ m }}</th>{% endfor %}
+            <th>합계</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for org in trend_orgs %}
+          <tr>
+            <td>{{ org }}</td>
+            {% for m in months %}<td>{{ trend[org].get(m, 0) }}</td>{% endfor %}
+            <td><strong>{{ trend[org].values()|sum }}</strong></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="{{ months|length + 2 }}" class="empty-row">데이터가 없습니다.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/chart.umd.min.js') }}"></script>
+  <script>
+    new Chart(document.getElementById('orgSeverityChart'), {
+      type: 'bar',
+      data: {
+        labels: [{% for r in org_rows %}{{ r.org|tojson }},{% endfor %}],
+        datasets: [
+          { label: 'CRITICAL', data: [{% for r in org_rows %}{{ r.critical }},{% endfor %}], backgroundColor: '#d64545' },
+          { label: 'WARNING', data: [{% for r in org_rows %}{{ r.warning }},{% endfor %}], backgroundColor: '#e0a72e' },
+          { label: 'INFO', data: [{% for r in org_rows %}{{ r.info }},{% endfor %}], backgroundColor: '#4a7fd6' }
+        ]
+      },
+      options: {
+        plugins: { title: { display: true, text: '조직별 심각도 건수' } },
+        scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+      }
+    });
+  </script>
+{% endif %}
+{% endblock %}

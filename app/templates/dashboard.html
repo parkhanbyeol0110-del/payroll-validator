@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}대시보드{% endblock %}
+{% block content %}
+<h1>검증 결과 대시보드</h1>
+
+{% if not latest_upload %}
+  <div class="card empty-state">
+    <p>아직 업로드된 급여 파일이 없습니다.</p>
+    <a class="btn" href="{{ url_for('upload.upload_file') }}">첫 파일 업로드하기</a>
+  </div>
+{% else %}
+  <div class="card">
+    <div class="detail-header">
+      <h2>{{ latest_upload.payroll_month }} 급여 검증 결과</h2>
+      <a class="btn" href="{{ url_for('dashboard.upload_detail', upload_id=latest_upload.id) }}">상세 보기</a>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi"><span class="kpi-label">전체 인원</span><span class="kpi-value">{{ summary.total }}명</span></div>
+      <div class="kpi kpi-normal"><span class="kpi-label">정상</span><span class="kpi-value">{{ summary.normal }}명</span></div>
+      <div class="kpi kpi-warning"><span class="kpi-label">검토 필요</span><span class="kpi-value">{{ summary.warning }}명</span></div>
+      <div class="kpi kpi-error"><span class="kpi-label">오류</span><span class="kpi-value">{{ summary.error }}명</span></div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-box">
+        <canvas id="severityChart"></canvas>
+      </div>
+      <div class="chart-box">
+        <canvas id="ruleChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>최근 업로드</h2>
+    <table class="simple-table">
+      <thead><tr><th>기준월</th><th>업로드 일시</th><th>인원</th><th>오류/경고</th><th></th></tr></thead>
+      <tbody>
+        {% for u in uploads %}
+        <tr>
+          <td>{{ u.payroll_month }}</td>
+          <td>{{ u.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td>{{ u.employee_count }}명</td>
+          <td>{{ u.results|length }}건</td>
+          <td><a href="{{ url_for('dashboard.upload_detail', upload_id=u.id) }}">보기</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/chart.umd.min.js') }}"></script>
+  <script>
+    new Chart(document.getElementById('severityChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['CRITICAL', 'WARNING', 'INFO'],
+        datasets: [{
+          data: [{{ summary.critical_count }}, {{ summary.warning_count }}, {{ summary.info_count }}],
+          backgroundColor: ['#d64545', '#e0a72e', '#4a7fd6']
+        }]
+      },
+      options: { plugins: { title: { display: true, text: '심각도별 건수' } } }
+    });
+
+    new Chart(document.getElementById('ruleChart'), {
+      type: 'bar',
+      data: {
+        labels: [{% for (code, name), count in summary.by_rule %}{{ name|tojson }},{% endfor %}],
+        datasets: [{
+          label: '건수',
+          data: [{% for (code, name), count in summary.by_rule %}{{ count }},{% endfor %}],
+          backgroundColor: '#4a7fd6'
+        }]
+      },
+      options: { plugins: { title: { display: true, text: 'Rule별 오류 건수' } }, indexAxis: 'y' }
+    });
+  </script>
+{% endif %}
+{% endblock %}

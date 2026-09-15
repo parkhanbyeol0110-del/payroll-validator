@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}급여 마감 전 검증 시스템{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  {% if current_user.is_authenticated %}
+  <header class="topbar">
+    <div class="brand"><a href="{{ url_for('dashboard.index') }}">급여 검증 시스템</a></div>
+    <nav>
+      <a href="{{ url_for('dashboard.index') }}">대시보드</a>
+      <a href="{{ url_for('upload.upload_file') }}">파일 업로드</a>
+      <a href="{{ url_for('dashboard.history') }}">검증 이력</a>
+      <a href="{{ url_for('dashboard.org_stats') }}">조직별 통계</a>
+      {% if current_user.is_admin %}<a href="{{ url_for('dashboard.rules') }}">Rule 관리</a>{% endif %}
+    </nav>
+    <div class="user-info">
+      <span>{{ current_user.name }}님</span>
+      <a href="{{ url_for('auth.logout') }}">로그아웃</a>
+    </div>
+  </header>
+  {% endif %}
+
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-list">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
