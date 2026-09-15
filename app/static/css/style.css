@@ -14,14 +14,14 @@
   --sidebar-border: #e4e7ec;
   --sidebar-hover-bg: #f5f6f8;
 
-  --critical: #c1443f;
-  --critical-bg: #fbeaea;
-  --warning: #a06a12;
-  --warning-bg: #faf1dd;
-  --info: #2f5aad;
-  --info-bg: #e9eefb;
-  --normal: #2c7a53;
-  --normal-bg: #e7f4ee;
+  --critical: #ef4444;
+  --critical-bg: #fee2e2;
+  --warning: #f59e0b;
+  --warning-bg: #fef3c7;
+  --info: #3b82f6;
+  --info-bg: #dbeafe;
+  --normal: #22c55e;
+  --normal-bg: #dcfce7;
 
   --radius-sm: 5px;
   --radius-md: 8px;

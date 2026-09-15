@@ -28,11 +28,11 @@
         </a>
         <a href="{{ url_for('dashboard.index') }}" class="{{ 'active' if request.endpoint == 'dashboard.index' }}">
           <svg viewBox="0 0 20 20" fill="none"><rect x="2.5" y="2.5" width="6" height="6" rx="1.2" stroke="currentColor" stroke-width="1.4"/><rect x="11.5" y="2.5" width="6" height="6" rx="1.2" stroke="currentColor" stroke-width="1.4"/><rect x="2.5" y="11.5" width="6" height="6" rx="1.2" stroke="currentColor" stroke-width="1.4"/><rect x="11.5" y="11.5" width="6" height="6" rx="1.2" stroke="currentColor" stroke-width="1.4"/></svg>
-          <span>대시보드</span>
+          <span>월별 현황</span>
         </a>
         <a href="{{ url_for('dashboard.org_stats') }}" class="{{ 'active' if request.endpoint == 'dashboard.org_stats' }}">
           <svg viewBox="0 0 20 20" fill="none"><path d="M4 16.5V9.5M10 16.5V3.5M16 16.5V12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-          <span>조직별 통계</span>
+          <span>조직별 현황</span>
         </a>
         <a href="{{ url_for('dashboard.history') }}" class="{{ 'active' if request.endpoint == 'dashboard.history' }}">
           <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.4"/><path d="M10 6V10L12.5 11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>

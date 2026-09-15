@@ -76,22 +76,24 @@
 
 <div class="card" id="resolvePanel">
   <h2>처리</h2>
-  <p class="hint" id="resolveEmpty">표에서 행을 선택하면 처리 상태를 변경할 수 있습니다.</p>
+  <p class="hint" id="resolveEmpty">표에서 행(체크박스)을 선택하면 처리 상태를 변경할 수 있습니다. 여러 건을 선택하면 한 번에 일괄 처리됩니다.</p>
   <div id="resolveBody" hidden>
-    <p style="margin:0 0 10px">
+    <p id="resolveSingleInfo" style="margin:0 0 10px">
       <strong id="resolveEmp"></strong> ·
       <span id="resolveOrg" class="hint"></span> ·
       <span id="resolveRule" class="hint"></span><br>
       <span id="resolveText" style="font-size:13px"></span>
     </p>
-    <form method="post" id="resolveForm" class="resolve-form">
+    <p id="resolveBulkInfo" class="hint" hidden></p>
+    <form method="post" id="resolveForm" class="resolve-form" action="{{ url_for('dashboard.bulk_resolve') }}">
+      <input type="hidden" name="result_ids" id="resolveIds" value="">
       <select name="status" id="resolveStatus">
         <option value="검토중">검토중</option>
         <option value="정상">정상</option>
         <option value="수정완료">수정완료</option>
       </select>
       <input type="text" name="reason" id="resolveReason" placeholder="처리 사유 (예: 승진에 따른 인상)">
-      <button type="submit">저장</button>
+      <button type="submit" id="resolveSubmit">저장</button>
     </form>
     <ul class="resolution-history" id="resolveHistory"></ul>
   </div>
@@ -111,7 +113,6 @@
       result_text: {{ r.result_text|tojson }},
       severity: {{ r.severity|tojson }},
       status: {{ r.status|tojson }},
-      resolve_url: {{ url_for('dashboard.resolve_result', result_id=r.id)|tojson }},
       history: [
         {% for h in r.resolutions %}
         { at: {{ h.resolved_at.strftime('%Y-%m-%d %H:%M')|tojson }}, name: {{ h.resolver.name|tojson }},
@@ -127,7 +128,7 @@
   }
 
   var gridApi = PV.initGrid('resultsGrid', [
-    { field: 'employee_id', headerName: '사번', maxWidth: 100 },
+    { field: 'employee_id', headerName: '사번', maxWidth: 120, checkboxSelection: true, headerCheckboxSelection: true },
     { field: 'employee_name', headerName: '성명', maxWidth: 100 },
     { field: 'org', headerName: '조직', maxWidth: 110 },
     { field: 'rule_name', headerName: 'Rule', maxWidth: 150 },
@@ -136,11 +137,16 @@
       valueFormatter: function (p) { return PV.severityLabels[p.value] || p.value; } },
     { field: 'status', headerName: '처리상태', maxWidth: 100 },
   ], resultRows, {
-    rowSelection: 'single',
+    rowSelection: 'multiple',
+    suppressRowClickSelection: true,
     onSelectionChanged: function (e) {
       var rows = e.api.getSelectedRows();
-      if (!rows.length) return;
-      showResolvePanel(rows[0]);
+      if (!rows.length) {
+        document.getElementById('resolveEmpty').hidden = false;
+        document.getElementById('resolveBody').hidden = true;
+        return;
+      }
+      showResolvePanel(rows);
     },
   });
 
@@ -148,24 +154,39 @@
     PV.exportGridToExcel(gridApi, '{{ upload.payroll_month }}_검증결과.xlsx', '{{ upload.payroll_month }}');
   });
 
-  function showResolvePanel(row) {
+  function showResolvePanel(rows) {
     document.getElementById('resolveEmpty').hidden = true;
     document.getElementById('resolveBody').hidden = false;
-    document.getElementById('resolveEmp').textContent = row.employee_id + ' ' + row.employee_name;
-    document.getElementById('resolveOrg').textContent = row.org;
-    document.getElementById('resolveRule').textContent = row.rule_name;
-    document.getElementById('resolveText').textContent = row.result_text;
-    document.getElementById('resolveStatus').value = (row.status === '미처리') ? '검토중' : row.status;
+    document.getElementById('resolveIds').value = rows.map(function (r) { return r.id; }).join(',');
     document.getElementById('resolveReason').value = '';
-    document.getElementById('resolveForm').action = row.resolve_url;
 
     var hist = document.getElementById('resolveHistory');
     hist.innerHTML = '';
-    row.history.forEach(function (h) {
-      var li = document.createElement('li');
-      li.textContent = '[' + h.at + '] ' + h.name + ' → ' + h.status + (h.reason ? ' (' + h.reason + ')' : '');
-      hist.appendChild(li);
-    });
+
+    if (rows.length === 1) {
+      var row = rows[0];
+      document.getElementById('resolveSingleInfo').hidden = false;
+      document.getElementById('resolveBulkInfo').hidden = true;
+      document.getElementById('resolveEmp').textContent = row.employee_id + ' ' + row.employee_name;
+      document.getElementById('resolveOrg').textContent = row.org;
+      document.getElementById('resolveRule').textContent = row.rule_name;
+      document.getElementById('resolveText').textContent = row.result_text;
+      document.getElementById('resolveStatus').value = (row.status === '미처리') ? '검토중' : row.status;
+      document.getElementById('resolveSubmit').textContent = '저장';
+
+      row.history.forEach(function (h) {
+        var li = document.createElement('li');
+        li.textContent = '[' + h.at + '] ' + h.name + ' → ' + h.status + (h.reason ? ' (' + h.reason + ')' : '');
+        hist.appendChild(li);
+      });
+    } else {
+      document.getElementById('resolveSingleInfo').hidden = true;
+      document.getElementById('resolveBulkInfo').hidden = false;
+      document.getElementById('resolveBulkInfo').textContent =
+        rows.length + '건을 선택했습니다. 아래 상태·사유로 한 번에 일괄 처리됩니다.';
+      document.getElementById('resolveStatus').value = '검토중';
+      document.getElementById('resolveSubmit').textContent = rows.length + '건 일괄 저장';
+    }
   }
 </script>
 {% endblock %}

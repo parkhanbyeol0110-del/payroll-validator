@@ -44,12 +44,13 @@ PV.exportGridToExcel = function (gridApi, filename, sheetName) {
 };
 
 PV.chartPalette = {
-  critical: "#dc4a4a",
-  criticalSoft: "#f4b7b7",
-  warning: "#d99a2b",
-  warningSoft: "#f0d38f",
-  info: "#3d6fd1",
-  infoSoft: "#a9c2ed",
+  critical: "#ef4444",
+  criticalSoft: "#fca5a5",
+  warning: "#f59e0b",
+  warningSoft: "#fcd34d",
+  info: "#3b82f6",
+  infoSoft: "#93c5fd",
+  normal: "#22c55e",
   grid: "#e8eaee",
   text: "#5b6472",
 };

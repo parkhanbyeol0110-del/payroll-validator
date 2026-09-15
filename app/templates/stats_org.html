@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}조직별 통계{% endblock %}
+{% block title %}조직별 현황 - 급여 검증 시스템{% endblock %}
 {% block content %}
 <div class="page-header">
-  <h1>조직별 통계</h1>
+  <h1>조직별 현황</h1>
 </div>
 
 {% if clients %}
@@ -87,21 +87,29 @@
   PV.initGrid('trendGrid', trendCols, trendRows, { pagination: false });
 
   new Chart(document.getElementById('orgSeverityChart'), {
-    type: 'bar',
+    type: 'line',
+    plugins: [PV.barValueLabelPlugin],
     data: {
       labels: orgRows.map(function (r) { return r.org; }),
       datasets: [
-        { label: '오류', data: orgRows.map(function (r) { return r.critical; }), backgroundColor: PV.chartPalette.critical },
-        { label: '경고', data: orgRows.map(function (r) { return r.warning; }), backgroundColor: PV.chartPalette.warning },
-        { label: '참고', data: orgRows.map(function (r) { return r.info; }), backgroundColor: PV.chartPalette.info },
+        { label: '오류', data: orgRows.map(function (r) { return r.critical; }),
+          borderColor: PV.chartPalette.critical, backgroundColor: PV.chartPalette.critical,
+          pointRadius: 4, pointHoverRadius: 6, borderWidth: 2.5, tension: 0.3 },
+        { label: '경고', data: orgRows.map(function (r) { return r.warning; }),
+          borderColor: PV.chartPalette.warning, backgroundColor: PV.chartPalette.warning,
+          pointRadius: 4, pointHoverRadius: 6, borderWidth: 2.5, tension: 0.3 },
+        { label: '참고', data: orgRows.map(function (r) { return r.info; }),
+          borderColor: PV.chartPalette.info, backgroundColor: PV.chartPalette.info,
+          pointRadius: 4, pointHoverRadius: 6, borderWidth: 2.5, tension: 0.3 },
       ]
     },
     options: {
       maintainAspectRatio: false,
+      layout: { padding: { top: 20 } },
       plugins: { legend: { position: 'bottom' } },
       scales: {
-        x: { stacked: true, grid: { display: false } },
-        y: { stacked: true, beginAtZero: true, ticks: { precision: 0 }, grid: { color: PV.chartPalette.grid } },
+        x: { grid: { display: false } },
+        y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: PV.chartPalette.grid } },
       }
     }
   });

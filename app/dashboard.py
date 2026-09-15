@@ -83,6 +83,36 @@ def resolve_result(result_id):
     return redirect(url_for("dashboard.upload_detail", upload_id=result.upload_id))
 
 
+@dashboard_bp.route("/results/bulk_resolve", methods=["POST"])
+@login_required
+def bulk_resolve():
+    ids_raw = request.form.get("result_ids", "")
+    ids = [int(x) for x in ids_raw.split(",") if x.strip().isdigit()]
+    new_status = request.form.get("status")
+    reason = request.form.get("reason", "").strip()
+
+    if not ids or new_status not in {"검토중", "정상", "수정완료", "미처리"}:
+        abort(400)
+
+    results = ValidationResult.query.filter(ValidationResult.id.in_(ids)).all()
+    if not results:
+        abort(404)
+    upload_id = results[0].upload_id
+
+    for result in results:
+        result.status = new_status
+        db.session.add(ResolutionHistory(
+            validation_result_id=result.id,
+            status=new_status,
+            reason=reason,
+            resolved_by=current_user.id,
+        ))
+    db.session.commit()
+
+    flash(f"{len(results)}건을 일괄 처리했습니다.", "success")
+    return redirect(url_for("dashboard.upload_detail", upload_id=upload_id))
+
+
 @dashboard_bp.route("/uploads/<int:upload_id>/revalidate", methods=["POST"])
 @login_required
 def revalidate(upload_id):

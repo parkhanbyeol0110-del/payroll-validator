@@ -7,6 +7,7 @@ from flask_login import login_required, current_user
 
 from .extensions import db
 from .models import PayrollUpload, PayrollRecord, ValidationRule, ValidationResult
+from .notify import notify_upload_result
 from .validation.engine import normalize_dataframe, run_validation, StructuralError
 
 upload_bp = Blueprint("upload", __name__)
@@ -131,6 +132,11 @@ def upload_file():
 
     payroll_upload.validation_seconds = round(time.time() - start_time, 3)
     db.session.commit()
+
+    critical_count = sum(1 for f in findings if f["severity"] == "CRITICAL")
+    warning_count = sum(1 for f in findings if f["severity"] == "WARNING")
+    detail_url = request.host_url.rstrip("/") + url_for("dashboard.upload_detail", upload_id=payroll_upload.id)
+    notify_upload_result(payroll_upload, critical_count, warning_count, detail_url)
 
     flash(f"검증 완료: 대상 {len(norm_df)}명 중 {len(result_rows)}건의 이상 항목이 발견되었습니다.", "success")
     return redirect(url_for("dashboard.upload_detail", upload_id=payroll_upload.id))
