@@ -36,6 +36,9 @@
       <div class="kpi kpi-warning"><span class="kpi-label">검토 필요</span><span class="kpi-value">{{ summary.warning }}</span></div>
       <div class="kpi kpi-error"><span class="kpi-label">오류</span><span class="kpi-value">{{ summary.error }}</span></div>
     </div>
+    <p class="hint">분류 기준(인원 수, 중복 없이 집계): <strong>오류</strong> = 오류(CRITICAL) 항목이 하나라도 있는 인원 ·
+      <strong>검토 필요</strong> = 오류는 없고 경고(WARNING) 항목만 있는 인원 · <strong>정상</strong> = 그 외 전원
+      (참고 항목만 있는 경우 포함)</p>
 
     <div class="chart-row">
       <div class="chart-box" style="max-width:280px">
