@@ -1,34 +1,46 @@
 {% extends "base.html" %}
 {% block title %}검증 이력{% endblock %}
 {% block content %}
-<h1>검증 이력 / 업무량 분석</h1>
+<div class="page-header">
+  <h1>검증 이력 / 업무량 분석</h1>
+</div>
 
 <div class="card">
-  <table class="simple-table">
-    <thead>
-      <tr>
-        <th>기준월</th><th>업로드 일시</th><th>업로드자</th><th>인원</th>
-        <th>CRITICAL</th><th>WARNING</th><th>INFO</th><th>처리완료</th><th>미처리</th><th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for u, s in rows %}
-      <tr>
-        <td>{{ u.payroll_month }}</td>
-        <td>{{ u.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</td>
-        <td>{{ u.uploader.name }}</td>
-        <td>{{ u.employee_count }}명</td>
-        <td>{{ s.critical_count }}</td>
-        <td>{{ s.warning_count }}</td>
-        <td>{{ s.info_count }}</td>
-        <td>{{ s.resolved_count }}</td>
-        <td>{{ s.unresolved_count }}</td>
-        <td><a href="{{ url_for('dashboard.upload_detail', upload_id=u.id) }}">상세</a></td>
-      </tr>
-      {% else %}
-      <tr><td colspan="10" class="empty-row">검증 이력이 없습니다.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div id="historyGrid" class="ag-theme-balham-no-font grid-panel"></div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  var historyRows = [
+    {% for u, s in rows %}
+    {
+      month: {{ u.payroll_month|tojson }},
+      uploaded_at: {{ u.uploaded_at.strftime('%Y-%m-%d %H:%M')|tojson }},
+      uploader: {{ u.uploader.name|tojson }},
+      headcount: {{ u.employee_count }},
+      critical: {{ s.critical_count }},
+      warning: {{ s.warning_count }},
+      info: {{ s.info_count }},
+      resolved: {{ s.resolved_count }},
+      unresolved: {{ s.unresolved_count }},
+      url: {{ url_for('dashboard.upload_detail', upload_id=u.id)|tojson }},
+    },
+    {% endfor %}
+  ];
+
+  PV.initGrid('historyGrid', [
+    { field: 'month', headerName: '기준월', maxWidth: 100 },
+    { field: 'uploaded_at', headerName: '업로드 일시', maxWidth: 160 },
+    { field: 'uploader', headerName: '업로드자', maxWidth: 100 },
+    { field: 'headcount', headerName: '인원', maxWidth: 90 },
+    { field: 'critical', headerName: 'CRITICAL', maxWidth: 100 },
+    { field: 'warning', headerName: 'WARNING', maxWidth: 100 },
+    { field: 'info', headerName: 'INFO', maxWidth: 90 },
+    { field: 'resolved', headerName: '처리완료', maxWidth: 100 },
+    { field: 'unresolved', headerName: '미처리', maxWidth: 90 },
+    { headerName: '', maxWidth: 90, sortable: false, filter: false,
+      cellRenderer: function (p) { return '<a href="' + p.data.url + '">상세 →</a>'; } },
+  ], historyRows, { pagination: false });
+</script>
 {% endblock %}

@@ -1,19 +1,29 @@
 {% extends "base.html" %}
 {% block title %}급여 파일 업로드{% endblock %}
 {% block content %}
-<h1>급여 파일 업로드</h1>
+<div class="page-header">
+  <h1>급여 파일 업로드</h1>
+</div>
 <p class="page-desc">마감 전 급여 파일을 업로드하면 자동으로 검증 규칙을 실행합니다.</p>
 
 <div class="card">
-  <form method="post" enctype="multipart/form-data" class="upload-form">
+  <form method="post" enctype="multipart/form-data" class="upload-form" id="uploadForm">
     <label>급여 기준월</label>
     <input type="month" name="payroll_month" required>
 
     <label>급여 파일 (xlsx, xls, csv)</label>
-    <input type="file" name="payroll_file" accept=".xlsx,.xls,.csv" required>
+    <input type="file" name="payroll_file" id="payrollFile" accept=".xlsx,.xls,.csv" required>
 
     <button type="submit">업로드 및 검증 시작</button>
   </form>
+</div>
+
+<div class="card" id="previewCard" hidden>
+  <div class="page-header" style="margin-bottom:10px">
+    <h2 style="margin:0">업로드 전 미리보기</h2>
+    <span class="hint" id="previewMeta"></span>
+  </div>
+  <div id="previewGrid" class="ag-theme-balham-no-font grid-panel"></div>
 </div>
 
 <div class="card">
@@ -24,4 +34,35 @@
   </table>
   <p class="hint">사번 / 성명 / 조직 / 기본급 / 실지급액은 필수입니다. 직급, 수당, 상여, 공제는 없으면 0으로 처리됩니다.</p>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  var previewGridApi = null;
+
+  document.getElementById('payrollFile').addEventListener('change', function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      var data = new Uint8Array(ev.target.result);
+      var workbook = XLSX.read(data, { type: 'array' });
+      var sheet = workbook.Sheets[workbook.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+      document.getElementById('previewCard').hidden = false;
+      document.getElementById('previewMeta').textContent = '전체 ' + rows.length + '행 중 상위 10행 표시';
+
+      if (!rows.length) return;
+      var columnDefs = Object.keys(rows[0]).map(function (key) {
+        return { field: key, headerName: key, minWidth: 100 };
+      });
+
+      if (previewGridApi) { previewGridApi.destroy(); }
+      previewGridApi = PV.initGrid('previewGrid', columnDefs, rows.slice(0, 10), { pagination: false });
+    };
+    reader.readAsArrayBuffer(file);
+  });
+</script>
 {% endblock %}

@@ -7,3 +7,6 @@ instance/
 .env.*
 !.env.example
 *.log
+
+.vercel
+.env*

@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% block title %}대시보드{% endblock %}
+{% block title %}대시보드 - 급여 검증 시스템{% endblock %}
 {% block content %}
-<h1>검증 결과 대시보드</h1>
+<div class="page-header">
+  <h1>대시보드</h1>
+</div>
 
 {% if not latest_upload %}
   <div class="card empty-state">
@@ -10,23 +12,25 @@
   </div>
 {% else %}
   <div class="card">
-    <div class="detail-header">
-      <h2>{{ latest_upload.payroll_month }} 급여 검증 결과</h2>
-      <a class="btn" href="{{ url_for('dashboard.upload_detail', upload_id=latest_upload.id) }}">상세 보기</a>
+    <div class="page-header" style="margin-bottom:14px">
+      <h2 style="margin:0">{{ latest_upload.payroll_month }} 급여 검증 결과</h2>
+      <a class="btn btn-secondary btn-sm" href="{{ url_for('dashboard.upload_detail', upload_id=latest_upload.id) }}">상세 보기 →</a>
     </div>
 
     <div class="kpi-row">
-      <div class="kpi"><span class="kpi-label">전체 인원</span><span class="kpi-value">{{ summary.total }}명</span></div>
-      <div class="kpi kpi-normal"><span class="kpi-label">정상</span><span class="kpi-value">{{ summary.normal }}명</span></div>
-      <div class="kpi kpi-warning"><span class="kpi-label">검토 필요</span><span class="kpi-value">{{ summary.warning }}명</span></div>
-      <div class="kpi kpi-error"><span class="kpi-label">오류</span><span class="kpi-value">{{ summary.error }}명</span></div>
+      <div class="kpi"><span class="kpi-label">전체 인원</span><span class="kpi-value">{{ summary.total }}</span></div>
+      <div class="kpi kpi-normal"><span class="kpi-label">정상</span><span class="kpi-value">{{ summary.normal }}</span></div>
+      <div class="kpi kpi-warning"><span class="kpi-label">검토 필요</span><span class="kpi-value">{{ summary.warning }}</span></div>
+      <div class="kpi kpi-error"><span class="kpi-label">오류</span><span class="kpi-value">{{ summary.error }}</span></div>
     </div>
 
     <div class="chart-row">
       <div class="chart-box">
+        <div class="section-label">심각도별 건수</div>
         <canvas id="severityChart"></canvas>
       </div>
       <div class="chart-box">
+        <div class="section-label">Rule별 오류 건수</div>
         <canvas id="ruleChart"></canvas>
       </div>
     </div>
@@ -34,48 +38,65 @@
 
   <div class="card">
     <h2>최근 업로드</h2>
-    <table class="simple-table">
-      <thead><tr><th>기준월</th><th>업로드 일시</th><th>인원</th><th>오류/경고</th><th></th></tr></thead>
-      <tbody>
-        {% for u in uploads %}
-        <tr>
-          <td>{{ u.payroll_month }}</td>
-          <td>{{ u.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</td>
-          <td>{{ u.employee_count }}명</td>
-          <td>{{ u.results|length }}건</td>
-          <td><a href="{{ url_for('dashboard.upload_detail', upload_id=u.id) }}">보기</a></td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div id="uploadsGrid" class="ag-theme-balham-no-font grid-panel"></div>
   </div>
+{% endif %}
+{% endblock %}
 
-  <script src="{{ url_for('static', filename='js/chart.umd.min.js') }}"></script>
-  <script>
-    new Chart(document.getElementById('severityChart'), {
-      type: 'doughnut',
-      data: {
-        labels: ['CRITICAL', 'WARNING', 'INFO'],
-        datasets: [{
-          data: [{{ summary.critical_count }}, {{ summary.warning_count }}, {{ summary.info_count }}],
-          backgroundColor: ['#d64545', '#e0a72e', '#4a7fd6']
-        }]
-      },
-      options: { plugins: { title: { display: true, text: '심각도별 건수' } } }
-    });
+{% block scripts %}
+{% if latest_upload %}
+<script>
+  var sevData = { critical: {{ summary.critical_count }}, warning: {{ summary.warning_count }}, info: {{ summary.info_count }} };
+  var ruleLabels = [{% for (code, name), count in summary.by_rule %}{{ name|tojson }},{% endfor %}];
+  var ruleCounts = [{% for (code, name), count in summary.by_rule %}{{ count }},{% endfor %}];
 
-    new Chart(document.getElementById('ruleChart'), {
-      type: 'bar',
-      data: {
-        labels: [{% for (code, name), count in summary.by_rule %}{{ name|tojson }},{% endfor %}],
-        datasets: [{
-          label: '건수',
-          data: [{% for (code, name), count in summary.by_rule %}{{ count }},{% endfor %}],
-          backgroundColor: '#4a7fd6'
-        }]
-      },
-      options: { plugins: { title: { display: true, text: 'Rule별 오류 건수' } }, indexAxis: 'y' }
-    });
-  </script>
+  new Chart(document.getElementById('severityChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['CRITICAL', 'WARNING', 'INFO'],
+      datasets: [{
+        data: [sevData.critical, sevData.warning, sevData.info],
+        backgroundColor: [PV.chartPalette.critical, PV.chartPalette.warning, PV.chartPalette.info],
+        borderWidth: 0,
+      }]
+    },
+    options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '65%' }
+  });
+
+  new Chart(document.getElementById('ruleChart'), {
+    type: 'bar',
+    data: {
+      labels: ruleLabels,
+      datasets: [{ label: '건수', data: ruleCounts, backgroundColor: PV.chartPalette.info, borderRadius: 3, maxBarThickness: 18 }]
+    },
+    options: {
+      indexAxis: 'y',
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: PV.chartPalette.grid } }, y: { grid: { display: false } } }
+    }
+  });
+
+  var uploadRows = [
+    {% for u in uploads %}
+    {
+      month: {{ u.payroll_month|tojson }},
+      uploaded_at: {{ u.uploaded_at.strftime('%Y-%m-%d %H:%M')|tojson }},
+      headcount: {{ u.employee_count }},
+      findings: {{ u.results|length }},
+      url: {{ url_for('dashboard.upload_detail', upload_id=u.id)|tojson }},
+    },
+    {% endfor %}
+  ];
+
+  PV.initGrid('uploadsGrid', [
+    { field: 'month', headerName: '기준월', maxWidth: 120 },
+    { field: 'uploaded_at', headerName: '업로드 일시', flex: 1 },
+    { field: 'headcount', headerName: '인원', maxWidth: 100 },
+    { field: 'findings', headerName: '오류/경고 건수', maxWidth: 130 },
+    { headerName: '', maxWidth: 90, sortable: false, filter: false,
+      cellRenderer: function (p) { return '<a href="' + p.data.url + '">보기 →</a>'; } },
+  ], uploadRows, { pagination: false });
+</script>
 {% endif %}
 {% endblock %}
