@@ -134,6 +134,19 @@ def revalidate(upload_id):
     return redirect(url_for("dashboard.upload_detail", upload_id=upload.id))
 
 
+@dashboard_bp.route("/uploads/<int:upload_id>/delete", methods=["POST"])
+@login_required
+def delete_upload(upload_id):
+    if not current_user.is_admin:
+        abort(403)
+    upload = PayrollUpload.query.get_or_404(upload_id)
+    client_name = upload.client_name
+    db.session.delete(upload)
+    db.session.commit()
+    flash(f"{client_name} {upload.payroll_month} 업로드를 삭제했습니다.", "success")
+    return redirect(url_for("dashboard.history"))
+
+
 @dashboard_bp.route("/history")
 @login_required
 def history():

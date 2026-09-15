@@ -8,6 +8,12 @@
     <form method="post" action="{{ url_for('dashboard.revalidate', upload_id=upload.id) }}">
       <button type="submit" class="btn btn-secondary btn-sm">재검증</button>
     </form>
+    {% if current_user.is_admin %}
+    <form method="post" action="{{ url_for('dashboard.delete_upload', upload_id=upload.id) }}"
+          onsubmit="return confirm('{{ upload.client_name }} {{ upload.payroll_month }} 업로드를 삭제할까요? 검증 결과와 처리 이력이 모두 사라집니다.');">
+      <button type="submit" class="btn btn-ghost btn-sm">삭제</button>
+    </form>
+    {% endif %}
   </div>
 </div>
 
