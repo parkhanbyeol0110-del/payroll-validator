@@ -6,7 +6,7 @@
   <title>{% block title %}급여 검증 시스템{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='vendor/agGridBalhamFont.min.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='vendor/ag-grid.min.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/ag-theme-balham-no-font.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/ag-theme-balham.min.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="{{ 'is-authed' if current_user.is_authenticated else 'is-guest' }}">
