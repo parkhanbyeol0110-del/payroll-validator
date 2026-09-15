@@ -8,10 +8,11 @@
   --text-faint: #9aa1ac;
   --accent: #fe6c2d;
   --accent-dark: #d6551f;
-  --sidebar-bg: #171b26;
-  --sidebar-text: #aeb4c2;
+  --sidebar-bg: #ffffff;
+  --sidebar-text: #6b7280;
   --sidebar-text-active: #ffffff;
-  --sidebar-border: #262c3b;
+  --sidebar-border: #e4e7ec;
+  --sidebar-hover-bg: #f5f6f8;
 
   --critical: #c1443f;
   --critical-bg: #fbeaea;
@@ -60,6 +61,7 @@ a:hover { text-decoration: underline; }
   position: sticky;
   top: 0;
   height: 100vh;
+  border-right: 1px solid var(--sidebar-border);
 }
 
 .sidebar-brand {
@@ -79,8 +81,8 @@ a:hover { text-decoration: underline; }
 }
 
 .brand-text { display: flex; flex-direction: column; line-height: 1.25; }
-.brand-text strong { font-size: 13.5px; color: #fff; font-weight: 600; }
-.brand-text small { font-size: 10.5px; color: #7f889c; letter-spacing: 0.2px; }
+.brand-text strong { font-size: 13.5px; color: var(--text); font-weight: 600; }
+.brand-text small { font-size: 10.5px; color: var(--text-faint); letter-spacing: 0.2px; }
 
 .sidebar-nav {
   flex: 1;
@@ -101,7 +103,7 @@ a:hover { text-decoration: underline; }
   font-size: 13px;
   font-weight: 500;
 }
-.sidebar-nav a:hover { background: #20263566; color: #fff; text-decoration: none; }
+.sidebar-nav a:hover { background: var(--sidebar-hover-bg); color: var(--text); text-decoration: none; }
 .sidebar-nav a.active { background: var(--accent); color: #fff; }
 .sidebar-nav a svg { width: 17px; height: 17px; flex-shrink: 0; }
 
@@ -114,15 +116,15 @@ a:hover { text-decoration: underline; }
 }
 .user-avatar {
   width: 28px; height: 28px; border-radius: 50%;
-  background: #2c3346; color: #fff;
+  background: var(--accent); color: #fff;
   display: flex; align-items: center; justify-content: center;
   font-size: 12px; font-weight: 600; flex-shrink: 0;
 }
 .user-meta { display: flex; flex-direction: column; line-height: 1.25; flex: 1; min-width: 0; }
-.user-meta strong { font-size: 12.5px; color: #fff; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.user-meta small { font-size: 10.5px; color: #7f889c; }
-.logout-link { color: #7f889c; display: flex; padding: 4px; border-radius: 4px; }
-.logout-link:hover { color: #fff; background: #20263566; }
+.user-meta strong { font-size: 12.5px; color: var(--text); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.user-meta small { font-size: 10.5px; color: var(--text-faint); }
+.logout-link { color: var(--text-faint); display: flex; padding: 4px; border-radius: 4px; }
+.logout-link:hover { color: var(--text); background: var(--sidebar-hover-bg); }
 .logout-link svg { width: 16px; height: 16px; }
 
 .main-col { flex: 1; min-width: 0; }
@@ -162,17 +164,18 @@ h2 { font-size: 14px; font-weight: 600; margin: 0 0 12px; color: var(--text); }
 .auth-panel {
   flex: 1.1;
   background: var(--sidebar-bg);
-  color: #cfd3dd;
+  color: var(--text-muted);
   padding: 64px 56px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  border-right: 1px solid var(--sidebar-border);
 }
 .brand-logo-lg { height: 34px; margin-bottom: 24px; }
-.auth-panel h1 { color: #fff; font-size: 26px; font-weight: 700; line-height: 1.35; margin: 0 0 14px; letter-spacing: -0.3px; }
-.auth-panel p { font-size: 13.5px; line-height: 1.7; color: #9aa1b4; margin: 0 0 26px; }
+.auth-panel h1 { color: var(--text); font-size: 26px; font-weight: 700; line-height: 1.35; margin: 0 0 14px; letter-spacing: -0.3px; }
+.auth-panel p { font-size: 13.5px; line-height: 1.7; color: var(--text-muted); margin: 0 0 26px; }
 .auth-points { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
-.auth-points li { font-size: 12.5px; color: #b7bdcb; padding-left: 18px; position: relative; }
+.auth-points li { font-size: 12.5px; color: var(--text-muted); padding-left: 18px; position: relative; }
 .auth-points li::before { content: ""; position: absolute; left: 0; top: 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
 
 .auth-form-side { flex: 0.85; display: flex; align-items: center; justify-content: center; background: var(--bg); }
