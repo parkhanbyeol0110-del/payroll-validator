@@ -6,8 +6,8 @@
   --text: #1f2430;
   --text-muted: #6b7280;
   --text-faint: #9aa1ac;
-  --accent: #3d5ed9;
-  --accent-dark: #2f49ad;
+  --accent: #fe6c2d;
+  --accent-dark: #d6551f;
   --sidebar-bg: #171b26;
   --sidebar-text: #aeb4c2;
   --sidebar-text-active: #ffffff;
@@ -64,25 +64,18 @@ a:hover { text-decoration: underline; }
 
 .sidebar-brand {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
   padding: 18px 16px;
   border-bottom: 1px solid var(--sidebar-border);
 }
 
-.brand-mark {
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.brand-logo {
+  height: 20px;
+  width: auto;
   flex-shrink: 0;
+  object-fit: contain;
 }
 
 .brand-text { display: flex; flex-direction: column; line-height: 1.25; }
@@ -175,7 +168,7 @@ h2 { font-size: 14px; font-weight: 600; margin: 0 0 12px; color: var(--text); }
   flex-direction: column;
   justify-content: center;
 }
-.brand-mark-lg { width: 42px; height: 42px; font-size: 16px; border-radius: 10px; margin-bottom: 24px; }
+.brand-logo-lg { height: 34px; margin-bottom: 24px; }
 .auth-panel h1 { color: #fff; font-size: 26px; font-weight: 700; line-height: 1.35; margin: 0 0 14px; letter-spacing: -0.3px; }
 .auth-panel p { font-size: 13.5px; line-height: 1.7; color: #9aa1b4; margin: 0 0 26px; }
 .auth-points { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
@@ -207,7 +200,7 @@ input[type="number"], select {
   background: var(--surface);
   color: var(--text);
 }
-input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(61, 94, 217, 0.12); }
+input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(254, 108, 45, 0.15); }
 
 .upload-form { display: flex; flex-direction: column; gap: 4px; max-width: 420px; }
 .upload-form label { font-size: 12.5px; color: var(--text-muted); margin-top: 10px; margin-bottom: 2px; }
