@@ -93,11 +93,17 @@ payroll-validator/
 5. **Rule 관리**(관리자 전용) — Rule 활성화/임계값 조정
 6. 검증 상세 화면(업로드별) — AG Grid 결과 테이블(체크박스 다중 선택 → 처리 패널, 1건이면 단건 상세, 여러 건이면 일괄 처리), 오류 유형별 건수 비례 막대(심각도 색상), 엑셀 내보내기, 재검증, 삭제(관리자)
 
-## 업로드 알림 (Slack)
+## 업로드 알림 (이메일)
 
-`SLACK_WEBHOOK_URL` 환경변수를 설정하면, 업로드 검증이 끝난 직후 오류(CRITICAL) 또는 경고(WARNING)가
-1건이라도 있을 때 Slack 채널로 알림을 보낸다 (`app/notify.py`). 설정하지 않으면 완전히 no-op —
-담당자가 굳이 대시보드를 열어보지 않아도 오류 발생 여부를 알 수 있게 하기 위한 기능.
+`SMTP_HOST`와 `NOTIFY_EMAIL_TO`를 둘 다 설정하면, 업로드 검증이 끝난 직후 오류(CRITICAL) 또는
+경고(WARNING)가 1건이라도 있을 때 이메일로 알림을 보낸다 (`app/notify.py`, `smtplib` 표준 라이브러리
+사용, 외부 의존성 없음). 둘 중 하나라도 없으면 완전히 no-op — 담당자가 굳이 대시보드를 열어보지
+않아도 오류 발생 여부를 알 수 있게 하기 위한 기능.
+
+환경변수:
+- `SMTP_HOST` (필수), `NOTIFY_EMAIL_TO` (필수, 콤마로 여러 명 지정 가능)
+- `SMTP_PORT` (기본 587), `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM`(기본값 SMTP_USERNAME),
+  `SMTP_USE_TLS`(기본 "1", STARTTLS 사용)
 
 ## BPO 다중 고객사 목업 데이터
 
