@@ -43,6 +43,10 @@ def create_app():
     def load_user(user_id):
         return db.session.get(User, int(user_id))
 
+    SEVERITY_LABELS = {"CRITICAL": "오류", "WARNING": "경고", "INFO": "참고"}
+    app.jinja_env.globals["SEVERITY_LABELS"] = SEVERITY_LABELS
+    app.jinja_env.globals["severity_label"] = lambda code: SEVERITY_LABELS.get(code, code)
+
     from .auth import auth_bp
     from .upload import upload_bp
     from .dashboard import dashboard_bp

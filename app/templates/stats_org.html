@@ -40,7 +40,7 @@
   </div>
 
   <div class="card">
-    <h2>월별 조직 오류 추이 (CRITICAL + WARNING 합계)</h2>
+    <h2>월별 조직 오류 추이 (오류+경고 합계)</h2>
     <p class="hint">반복적으로 오류가 발생하는 조직을 파악하기 위한 표입니다.</p>
     <div id="trendGrid" class="ag-theme-balham grid-panel"></div>
   </div>
@@ -60,9 +60,9 @@
   var orgGridApi = PV.initGrid('orgGrid', [
     { field: 'org', headerName: '조직', maxWidth: 140 },
     { field: 'headcount', headerName: '인원', maxWidth: 90 },
-    { field: 'critical', headerName: 'CRITICAL', maxWidth: 110 },
-    { field: 'warning', headerName: 'WARNING', maxWidth: 110 },
-    { field: 'info', headerName: 'INFO', maxWidth: 90 },
+    { field: 'critical', headerName: '오류', maxWidth: 90 },
+    { field: 'warning', headerName: '경고', maxWidth: 90 },
+    { field: 'info', headerName: '참고', maxWidth: 90 },
     { field: 'error_rate', headerName: '오류율(%)', maxWidth: 110 },
     { field: 'unresolved', headerName: '미처리', maxWidth: 90 },
     { field: 'resolved', headerName: '처리완료', maxWidth: 100 },
@@ -91,9 +91,9 @@
     data: {
       labels: orgRows.map(function (r) { return r.org; }),
       datasets: [
-        { label: 'CRITICAL', data: orgRows.map(function (r) { return r.critical; }), backgroundColor: PV.chartPalette.critical },
-        { label: 'WARNING', data: orgRows.map(function (r) { return r.warning; }), backgroundColor: PV.chartPalette.warning },
-        { label: 'INFO', data: orgRows.map(function (r) { return r.info; }), backgroundColor: PV.chartPalette.info },
+        { label: '오류', data: orgRows.map(function (r) { return r.critical; }), backgroundColor: PV.chartPalette.critical },
+        { label: '경고', data: orgRows.map(function (r) { return r.warning; }), backgroundColor: PV.chartPalette.warning },
+        { label: '참고', data: orgRows.map(function (r) { return r.info; }), backgroundColor: PV.chartPalette.info },
       ]
     },
     options: {

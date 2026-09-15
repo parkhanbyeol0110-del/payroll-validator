@@ -290,8 +290,17 @@ def _upload_summary(upload):
     by_rule = {}
     for r in results:
         key = (r.rule.rule_code, r.rule.rule_name)
-        by_rule.setdefault(key, 0)
-        by_rule[key] += 1
+        entry = by_rule.setdefault(key, {"count": 0, "severity": r.severity})
+        entry["count"] += 1
+        # a rule can theoretically span severities across rows; keep the most severe seen
+        if _SEVERITY_RANK.get(r.severity, 0) > _SEVERITY_RANK.get(entry["severity"], 0):
+            entry["severity"] = r.severity
+
+    by_rule_list = sorted(
+        [{"code": code, "name": name, "count": v["count"], "severity": v["severity"]}
+         for (code, name), v in by_rule.items()],
+        key=lambda x: -x["count"],
+    )
 
     return {
         "total": total,
@@ -303,5 +312,8 @@ def _upload_summary(upload):
         "info_count": sum(1 for r in results if r.severity == "INFO"),
         "unresolved_count": sum(1 for r in results if r.status == "미처리"),
         "resolved_count": sum(1 for r in results if r.status in ("정상", "수정완료")),
-        "by_rule": sorted(by_rule.items(), key=lambda kv: -kv[1]),
+        "by_rule": by_rule_list,
     }
+
+
+_SEVERITY_RANK = {"INFO": 1, "WARNING": 2, "CRITICAL": 3}

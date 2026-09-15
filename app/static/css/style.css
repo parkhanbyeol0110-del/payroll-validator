@@ -281,6 +281,23 @@ button:hover, .btn:hover { background: var(--accent-dark); border-color: var(--a
 }
 .grid-empty { color: var(--text-faint); font-size: 12.5px; }
 
+/* ---------- Rule bar visualization ---------- */
+
+.rule-bar-list { display: flex; flex-direction: column; gap: 8px; }
+.rule-bar-row { display: grid; grid-template-columns: 180px 1fr 52px auto; align-items: center; gap: 10px; }
+.rule-bar-label { font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rule-bar-track { background: var(--surface-sunken); border-radius: 999px; height: 10px; overflow: hidden; }
+.rule-bar-fill { height: 100%; border-radius: 999px; min-width: 3px; }
+.rule-bar-fill.sev-critical { background: var(--critical); }
+.rule-bar-fill.sev-warning { background: var(--warning); }
+.rule-bar-fill.sev-info { background: var(--info); }
+.rule-bar-count { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+
+@media (max-width: 640px) {
+  .rule-bar-row { grid-template-columns: 1fr; gap: 4px; }
+  .rule-bar-count { text-align: left; }
+}
+
 /* ---------- Badges ---------- */
 
 .badge { padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.2px; display: inline-block; }
