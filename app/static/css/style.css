@@ -130,6 +130,63 @@ a:hover { text-decoration: underline; }
 .main-col { flex: 1; min-width: 0; }
 .content { max-width: 1180px; margin: 0 auto; padding: 28px 32px 60px; }
 
+/* ---------- Mobile nav (off-canvas sidebar) ---------- */
+
+.mobile-topbar { display: none; }
+.sidebar-backdrop { display: none; }
+
+@media (max-width: 860px) {
+  .mobile-topbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 14px;
+  }
+  .mobile-topbar-logo { height: 18px; width: auto; }
+  .mobile-menu-btn {
+    background: none;
+    border: none;
+    padding: 6px;
+    margin: -6px;
+    color: var(--text);
+    display: flex;
+    cursor: pointer;
+  }
+  .mobile-menu-btn svg { width: 22px; height: 22px; }
+
+  .shell { position: relative; }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    z-index: 45;
+    box-shadow: 4px 0 16px rgba(20, 24, 34, 0.15);
+  }
+  body.sidebar-open .sidebar { transform: translateX(0); }
+  body.sidebar-open .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 18, 25, 0.4);
+    z-index: 40;
+  }
+  body.sidebar-open { overflow: hidden; }
+
+  .content { padding: 20px 16px 40px; }
+  .kpi-row { flex-wrap: wrap; }
+  .action-row { flex-wrap: wrap; }
+}
+
 /* ---------- Typography ---------- */
 
 .page-header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }

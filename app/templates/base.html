@@ -11,6 +11,13 @@
 </head>
 <body class="{{ 'is-authed' if current_user.is_authenticated else 'is-guest' }}">
   {% if current_user.is_authenticated %}
+  <div class="mobile-topbar">
+    <button type="button" class="mobile-menu-btn" id="mobileMenuBtn" aria-label="메뉴 열기">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M3 5.5H17M3 10H17M3 14.5H17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+    <img src="{{ url_for('static', filename='img/etners-logo-color.png') }}" alt="etners" class="mobile-topbar-logo">
+  </div>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
   <div class="shell">
     <aside class="sidebar">
       <div class="sidebar-brand">
@@ -77,6 +84,16 @@
       </main>
     </div>
   </div>
+  <script>
+    (function () {
+      var menuBtn = document.getElementById('mobileMenuBtn');
+      var backdrop = document.getElementById('sidebarBackdrop');
+      function closeMenu() { document.body.classList.remove('sidebar-open'); }
+      if (menuBtn) menuBtn.addEventListener('click', function () { document.body.classList.toggle('sidebar-open'); });
+      if (backdrop) backdrop.addEventListener('click', closeMenu);
+      document.querySelectorAll('.sidebar-nav a').forEach(function (a) { a.addEventListener('click', closeMenu); });
+    })();
+  </script>
   {% else %}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
